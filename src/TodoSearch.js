@@ -1,8 +1,12 @@
 import React from 'react';
 
 function TodoSearch(){
+    const onSearch = (event)=>{
+        console.log(event.target.value);
+    }
     return(
-        <h2>Has completado 2 de 3 Todos</h2>
+        <input placeholder='Cebolla'
+        onChange={onSearch}></input>
     )
 }
 
