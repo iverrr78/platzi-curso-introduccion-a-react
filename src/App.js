@@ -1,4 +1,5 @@
 import './App.css';
+import React from 'react';
 import { TodoCounter } from './TodoCounter';
 import { TodoSearch } from './TodoSearch';
 import { TodoList } from './TodoList'
@@ -9,10 +10,14 @@ const todos = [{ 'text': 'Cortar cebolla', 'completed': false}, { 'text': 'tomar
 { 'text': 'LLorar con la llorona', 'completed': false}];
 
 function App() {
+  const [searchValue, SearchSetState] = React.useState('');
+  
   return (
     <>
     <TodoCounter/>
-    <TodoSearch/>
+    <TodoSearch searchValue = {searchValue}
+      SearchSetState = {SearchSetState}
+    />
     <TodoList>
       {todos.map(todo=>(<TodoItem/>))}
     </TodoList>
