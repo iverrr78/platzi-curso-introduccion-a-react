@@ -9,8 +9,33 @@ import { CreateTodoButton } from './CeateTodoButton';
 const defaulttodos = [{ 'text': 'Cortar cebolla', 'completed': true}, { 'text': 'tomar curso de react', 'completed': false},
 { 'text': 'LLorar con la llorona', 'completed': false}];
 
+function useLocalStorage(itemname, initialValue){
+  const localStorageTodos = localStorage.getItem(itemname);
+  let parsedItem;
+
+  if(!localStorageTodos){
+    localStorage.setItem(itemname, JSON.stringify(initialValue));
+    parsedItem = [];
+  }
+  else{
+    parsedItem = JSON.parse(localStorageTodos);
+  }
+
+  const[item, setItem] = React.useState(parsedItem);
+
+  const saveItem = (newItem)=>{
+    let stringifieditem = JSON.stringify(newItem);
+    localStorage.setItem(itemname , stringifieditem);
+    setItem(newItem);
+
+    return [item, saveItem];
+  }
+  
+}
+
 function App() {
-  const[todos, setTodos] = React.useState(defaulttodos);
+
+  const [todos, saveTodos] = useLocalStorage('TODOS_V1');
   const [searchValue, SearchSetState] = React.useState('');
   
   const completedTodos = todos.filter(todo=>todo.completed).length;
@@ -26,17 +51,19 @@ function App() {
     console.log(newTodos);
   }
 
+  
+
   const completeTodo = (text)=>{
     const todoIndex = todos.findIndex(todo => todo.text == text);
     const newTodos = [...todos];
     newTodos[todoIndex].completed = true;
-    setTodos(newTodos);
+    saveTodos(newTodos);
   };
   const deleteTodo = (text)=>{
     const todoIndex = todos.findIndex(todo => todo.text == text);
     const newTodos = [...todos];
     newTodos.splice(todoIndex,1);
-    setTodos(newTodos);
+    saveTodos(newTodos);
   };
   return (
     <>
