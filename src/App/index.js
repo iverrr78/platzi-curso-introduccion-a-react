@@ -1,41 +1,63 @@
 import './App.css';
 import React from 'react';
-import { TodoCounter } from './TodoCounter';
-import { TodoSearch } from './TodoSearch';
-import { TodoList } from './TodoList'
-import { TodoItem } from './TodoItem';
-import { CreateTodoButton } from './CeateTodoButton';
+import { AppUI } from './AppUI';
 
 const defaulttodos = [{ 'text': 'Cortar cebolla', 'completed': true}, { 'text': 'tomar curso de react', 'completed': false},
 { 'text': 'LLorar con la llorona', 'completed': false}];
 
 function useLocalStorage(itemname, initialValue){
-  const localStorageTodos = localStorage.getItem(itemname);
-  let parsedItem;
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(false);
+  const [item, setItem] = React.useState(initialValue);
+  React.useEffect(()=>{
+    setTimeout(()=>{
+    try{
+      const localStorageTodos = localStorage.getItem(itemname);
+    let parsedItem;
 
-  if(!localStorageTodos){
-    localStorage.setItem(itemname, JSON.stringify(initialValue));
-    parsedItem = [];
+    if(!localStorageTodos){
+      localStorage.setItem(itemname, JSON.stringify(initialValue));
+      parsedItem = [];
+    }
+    else{
+      parsedItem = JSON.parse(localStorageTodos);
+    }
+    
+    setItem(parsedItem);
+    setLoading(false);
+  }catch(error){
+    setError(error);
   }
-  else{
-    parsedItem = JSON.parse(localStorageTodos);
-  }
-
-  const[item, setItem] = React.useState(parsedItem);
-
+      },1000)
+  })
+  
   const saveItem = (newItem)=>{
+    try{
     let stringifieditem = JSON.stringify(newItem);
     localStorage.setItem(itemname , stringifieditem);
     setItem(newItem);
-
-    return [item, saveItem];
+    }catch(error){
+      setError(error);
+    }
   }
+
+  return {
+    item,
+    saveItem,
+    loading,
+    error
+  };
   
 }
 
 function App() {
 
-  const [todos, saveTodos] = useLocalStorage('TODOS_V1');
+  const {
+    item: todos,
+    saveItem: saveTodos,
+    loading,
+    error
+  } = useLocalStorage('TODOS_V1', []);
   const [searchValue, SearchSetState] = React.useState('');
   
   const completedTodos = todos.filter(todo=>todo.completed).length;
@@ -65,26 +87,20 @@ function App() {
     newTodos.splice(todoIndex,1);
     saveTodos(newTodos);
   };
+
+  React.useEffect(()=>{
+    console.log('use effect');
+  },[todalTodos]);
+
   return (
-    <>
-    <TodoCounter
-      total={todalTodos}
-      completed={completedTodos}
-    />
-    <TodoSearch searchValue = {searchValue}
+    <AppUI todalTodos={todalTodos}
+      completedTodos={completedTodos}
+      searchValue = {searchValue}
       SearchSetState = {SearchSetState}
+      newTodos = {newTodos}
+      completeTodo = {completeTodo}
+      deleteTodo = {deleteTodo}
     />
-    <TodoList>
-      {newTodos.map(todo=>(<TodoItem 
-        key={todo.text}
-        text={todo.text}
-        completed={todo.completed}
-        onComplete={() => completeTodo(todo.text)}
-        onDelete={()=> deleteTodo(todo.text)}
-      />))}
-    </TodoList>
-    <CreateTodoButton/>
-    </>
   );
 }
 
